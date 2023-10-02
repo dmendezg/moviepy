@@ -80,6 +80,7 @@ class FFMPEG_VideoWriter:
         cmd = [
             get_setting("FFMPEG_BINARY"),
             '-y',
+            '-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda',
             '-loglevel', 'error' if logfile == sp.PIPE else 'info',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',

@@ -127,8 +127,7 @@ class FFMPEG_VideoWriter:
         if os.name == "nt":
             popen_params["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
         
-        logger = proglog.default_bar_logger(logger)
-        logger(message='Command: %s\n' % cmd.join(' '))
+        print(f"Command: {cmd.join(' ')}")
 
         self.proc = sp.Popen(cmd, **popen_params)
 

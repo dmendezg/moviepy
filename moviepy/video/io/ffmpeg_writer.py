@@ -82,8 +82,6 @@ class FFMPEG_VideoWriter:
             '-y',
             '-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda',
             '-loglevel', 'error' if logfile == sp.PIPE else 'info',
-            '-f', 'rawvideo',
-            '-vcodec', 'rawvideo',
             '-s', '%dx%d' % (size[0], size[1]),
             '-pix_fmt', 'rgba' if withmask else 'rgb24',
             '-r', '%.02f' % fps,
@@ -95,8 +93,8 @@ class FFMPEG_VideoWriter:
                 '-acodec', 'copy'
             ])
         cmd.extend([
-            '-vcodec', codec,
-            '-preset', preset,
+            '-c:v', codec,
+            '-preset', 'fast',
         ])
         if ffmpeg_params is not None:
             cmd.extend(ffmpeg_params)

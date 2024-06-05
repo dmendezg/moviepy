@@ -40,7 +40,7 @@ from moviepy.video.io.gif_writers import (
     write_gif_with_image_io,
     write_gif_with_tempfiles,
 )
-from moviepy.video.tools.drawing import blit
+from moviepy.video.tools.drawing import blit_gpu
 
 
 class VideoClip(Clip):
@@ -699,7 +699,7 @@ class VideoClip(Clip):
             pos[1] = D[pos[1]]
 
         pos = map(int, pos)
-        return blit(im_img, picture, pos, mask=im_mask)
+        return blit_gpu(im_img, picture, pos, mask=im_mask)
 
     def add_mask(self):
         """Add a mask VideoClip to the VideoClip.

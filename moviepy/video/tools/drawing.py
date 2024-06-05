@@ -22,7 +22,7 @@ def blit(im1, im2, pos=None, mask=None):
     return im2
 
 
-def blit_gpu(im1, im2, pos=None, mask=None):
+def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False): 
     """Blit an image over another.
 
     Blits ``im1`` on ``im2`` at position ``pos=(x,y)``, using the
@@ -30,7 +30,6 @@ def blit_gpu(im1, im2, pos=None, mask=None):
     """
     device_name = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(device_name)
-    print(f"Using device: {device_name}")
 
     if pos is None:
         pos = (0, 0)

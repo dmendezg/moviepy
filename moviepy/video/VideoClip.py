@@ -699,7 +699,7 @@ class VideoClip(Clip):
             pos[1] = D[pos[1]]
 
         pos = map(int, pos)
-        return blit_gpu(im_img, picture, pos, mask=im_mask)
+        return blit_gpu(im_img, picture, pos, mask=im_mask, ismask=self.ismask)
 
     def add_mask(self):
         """Add a mask VideoClip to the VideoClip.

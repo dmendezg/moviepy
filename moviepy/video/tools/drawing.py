@@ -20,7 +20,10 @@ def blit(im1, im2, pos=None, mask=None):
     im2.paste(im1, pos, mask)
     return im2
 
+
 def blit_gpu(im1, im2, pos=None, mask=None, ismask=False):
+    im1 = np.array(im1)
+    im2 = np.array(im2)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if pos is None:

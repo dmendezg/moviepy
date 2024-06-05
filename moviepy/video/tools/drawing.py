@@ -21,10 +21,12 @@ def blit(im1, im2, pos=None, mask=None):
     return im2
 
 
-def blit_gpu(im1, im2, pos=None, mask=None, ismask=False):
+def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
     im1 = np.array(im1)
     im2 = np.array(im2)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device_name = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device_name)
+    print(f"device_name: {device_name}")
 
     if pos is None:
         pos = [0, 0]
@@ -66,7 +68,7 @@ def blit_gpu(im1, im2, pos=None, mask=None, ismask=False):
         new_im2[yp1:yp2, xp1:xp2] = mask * blitted + (1 - mask) * blit_region
 
     # return new_im2.cpu().numpy().astype("uint8") if not ismask else new_im2.cpu().numpy()   # 6.13 ms / 100 loops
-    return new_im2 if not ismask else new_im2
+    return new_im2 if not is_mask else new_im2
 
 def color_gradient(
     size,

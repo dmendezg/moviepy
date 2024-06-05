@@ -29,10 +29,8 @@ def tensor_to_np(tensor):
 
 def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
     
-    if isinstance(im1, torch.Tensor):
-        im1 = im1.cpu().numpy()
-    if isinstance(im2, torch.Tensor):
-        im2 = im2.cpu().numpy()
+    im1 = im1.cpu().numpy()
+    im2 = im2.cpu().numpy()
 
     im1 = np.array(im1)
     im2 = np.array(im2)

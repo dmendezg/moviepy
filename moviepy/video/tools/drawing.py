@@ -64,11 +64,14 @@ def blit_gpu(im1, im2, pos=None, mask=None):
 
     # Blit the image
     if mask is None:
-        im2_torch[y1:y2, x1:x2] = im1_torch[:(y2 - y1), :(x2 - x1)]
+        im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] = im1_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]]
     else:
-        im2_torch[y1:y2, x1:x2] = (
-            im1_torch[:(y2 - y1), :(x2 - x1)] * mask_torch[:(y2 - y1), :(x2 - x1)] +
-            im2_torch[y1:y2, x1:x2] * (1 - mask_torch[:(y2 - y1), :(x2 - x1)])
+        if len(mask_torch.shape) == 2:
+            mask_torch = mask_torch.unsqueeze(-1).repeat(1, 1, im1_torch.shape[2])
+        mask_torch = mask_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]]
+        im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] = (
+            im1_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]] * mask_torch +
+            im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] * (1 - mask_torch)
         )
 
     # Convert the result back to a NumPy array and then to a PIL image

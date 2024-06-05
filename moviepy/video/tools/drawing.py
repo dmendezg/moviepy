@@ -67,7 +67,7 @@ def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
         blit_region = new_im2[yp1:yp2, xp1:xp2]
         new_im2[yp1:yp2, xp1:xp2] = mask * blitted + (1 - mask) * blit_region
 
-    # return new_im2.cpu().numpy().astype("uint8") if not ismask else new_im2.cpu().numpy()   # 6.13 ms / 100 loops
+    # return new_im2.cpu().numpy().astype("uint8") if not is_mask else new_im2.cpu().numpy()   # 6.13 ms / 100 loops
     return new_im2 if not is_mask else new_im2
 
 def color_gradient(

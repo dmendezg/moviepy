@@ -62,15 +62,25 @@ def blit_gpu(im1, im2, pos=None, mask=None):
     y2 = min(h2, y2)
     x2 = min(w2, x2)
 
+    # Ensure the region dimensions match
+    region_h = y2 - y1
+    region_w = x2 - x1
+
+    if im1_torch.dim() == 2:
+        im1_torch = im1_torch.unsqueeze(-1).repeat(1, 1, 3)
+    if im2_torch.dim() == 2:
+        im2_torch = im2_torch.unsqueeze(-1).repeat(1, 1, 3)
+
+    if mask is not None and mask_torch.dim() == 2:
+        mask_torch = mask_torch.unsqueeze(-1).repeat(1, 1, 3)
+
     # Blit the image
     if mask is None:
-        im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] = im1_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]]
+        im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] = im1_torch[:region_h, :region_w, :im1_torch.shape[2]]
     else:
-        if len(mask_torch.shape) == 2:
-            mask_torch = mask_torch.unsqueeze(-1).repeat(1, 1, im1_torch.shape[2])
-        mask_torch = mask_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]]
+        mask_torch = mask_torch[:region_h, :region_w, :im1_torch.shape[2]]
         im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] = (
-            im1_torch[:(y2 - y1), :(x2 - x1), :im1_torch.shape[2]] * mask_torch +
+            im1_torch[:region_h, :region_w, :im1_torch.shape[2]] * mask_torch +
             im2_torch[y1:y2, x1:x2, :im1_torch.shape[2]] * (1 - mask_torch)
         )
 

@@ -533,7 +533,8 @@ class Clip:
 
             frame = self.get_frame(t)
             if (dtype is not None) and (frame.dtype != dtype):
-                frame = frame.astype(dtype)
+                # frame = frame.astype(dtype)
+                frame = frame.cpu().numpy().astype(dtype)
             if with_times:
                 yield t, frame
             else:

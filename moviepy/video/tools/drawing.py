@@ -4,6 +4,7 @@ methods that are difficult to do with the existing Python libraries.
 
 import numpy as np
 import torch
+from PIL import Image
 
 
 def blit(im1, im2, pos=None, mask=None):
@@ -28,12 +29,6 @@ def tensor_to_np(tensor):
 
 
 def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
-    
-    im1 = im1.cpu().numpy()
-    im2 = im2.cpu().numpy()
-
-    im1 = np.array(im1)
-    im2 = np.array(im2)
     device_name = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(device_name)
     print(f"device_name: {device_name}")
@@ -56,7 +51,12 @@ def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
     if (xp1 >= xp2) or (yp1 >= yp2):
         return im2
 
-    if not isinstance(im1, torch.Tensor):               # 5.43 ms per loop / 100 loops
+    if isinstance(im1, Image.Image):
+        im1 = np.array(im1)
+    if isinstance(im2, Image.Image):
+        im2 = np.array(im2)
+
+    if not isinstance(im1, torch.Tensor):
         im1 = torch.tensor(im1, device=device)
     if not isinstance(im2, torch.Tensor):
         im2 = torch.tensor(im2, device=device)
@@ -68,8 +68,10 @@ def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
     if mask is None:
         new_im2[yp1:yp2, xp1:xp2] = blitted
     else:
-        if not isinstance(mask, torch.Tensor):          # 2.71 ms per loop / 10 loops
-            mask = torch.tensor(mask[y1:y2, x1:x2], device=device)  # 1.45 ms / 100 loops
+        if isinstance(mask, Image.Image):
+            mask = np.array(mask)
+        if not isinstance(mask, torch.Tensor):
+            mask = torch.tensor(mask[y1:y2, x1:x2], device=device)
         else:
             mask = mask[y1:y2, x1:x2]
         if len(im1.shape) == 3:
@@ -77,8 +79,15 @@ def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
         blit_region = new_im2[yp1:yp2, xp1:xp2]
         new_im2[yp1:yp2, xp1:xp2] = mask * blitted + (1 - mask) * blit_region
 
-    # return new_im2.cpu().numpy().astype("uint8") if not is_mask else new_im2.cpu().numpy()   # 6.13 ms / 100 loops
-    return new_im2 if not is_mask else new_im2
+    return new_im2.cpu().numpy().astype("uint8") if not is_mask else new_im2.cpu().numpy()
+
+# Ensure im1 and im2 are in the correct format
+def convert_to_numpy_if_needed(image):
+    if isinstance(image, torch.Tensor):
+        return image.cpu().numpy()
+    elif isinstance(image, Image.Image):
+        return np.array(image)
+    return image
 
 def color_gradient(
     size,

@@ -3,6 +3,8 @@ methods that are difficult to do with the existing Python libraries.
 """
 
 import numpy as np
+import torch
+from PIL import Image
 
 
 def blit(im1, im2, pos=None, mask=None):
@@ -18,6 +20,62 @@ def blit(im1, im2, pos=None, mask=None):
         pos = tuple(pos)
     im2.paste(im1, pos, mask)
     return im2
+
+
+def blit_gpu(im1, im2, pos=None, mask=None):
+    """Blit an image over another.
+
+    Blits ``im1`` on ``im2`` at position ``pos=(x,y)``, using the
+    ``mask`` if provided.
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if pos is None:
+        pos = (0, 0)
+    else:
+        pos = tuple(pos)
+
+    # Convert PIL images to NumPy arrays
+    im1_np = np.array(im1)
+    im2_np = np.array(im2)
+
+    # Convert NumPy arrays to torch tensors
+    im1_torch = torch.tensor(im1_np, device=device)
+    im2_torch = torch.tensor(im2_np, device=device)
+
+    if mask is not None:
+        mask_np = np.array(mask)
+        mask_torch = torch.tensor(mask_np, device=device)
+
+    # Get the dimensions of the images
+    y1, x1 = pos
+    h1, w1 = im1_torch.shape[:2]
+    h2, w2 = im2_torch.shape[:2]
+
+    # Determine the region to blit
+    y2 = y1 + h1
+    x2 = x1 + w1
+
+    # Ensure the region is within the bounds of im2
+    y1 = max(0, y1)
+    x1 = max(0, x1)
+    y2 = min(h2, y2)
+    x2 = min(w2, x2)
+
+    # Blit the image
+    if mask is None:
+        im2_torch[y1:y2, x1:x2] = im1_torch[:(y2 - y1), :(x2 - x1)]
+    else:
+        im2_torch[y1:y2, x1:x2] = (
+            im1_torch[:(y2 - y1), :(x2 - x1)] * mask_torch[:(y2 - y1), :(x2 - x1)] +
+            im2_torch[y1:y2, x1:x2] * (1 - mask_torch[:(y2 - y1), :(x2 - x1)])
+        )
+
+    # Convert the result back to a NumPy array and then to a PIL image
+    im2_result = im2_torch.cpu().numpy()
+    im2_result = Image.fromarray(im2_result.astype(np.uint8))
+
+    return im2_result
 
 
 def color_gradient(

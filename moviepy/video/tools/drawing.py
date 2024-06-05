@@ -28,7 +28,9 @@ def blit_gpu(im1, im2, pos=None, mask=None):
     Blits ``im1`` on ``im2`` at position ``pos=(x,y)``, using the
     ``mask`` if provided.
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device_name = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device_name)
+    print(f"Using device: {device_name}")
 
     if pos is None:
         pos = (0, 0)

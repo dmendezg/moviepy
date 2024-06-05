@@ -21,7 +21,19 @@ def blit(im1, im2, pos=None, mask=None):
     return im2
 
 
+def tensor_to_np(tensor):
+    if tensor.is_cuda:
+        tensor = tensor.cpu()
+    return tensor.numpy()
+
+
 def blit_gpu(im1, im2, pos=None, mask=None, is_mask=False):
+    
+    if isinstance(im1, torch.Tensor):
+        im1 = im1.cpu().numpy()
+    if isinstance(im2, torch.Tensor):
+        im2 = im2.cpu().numpy()
+
     im1 = np.array(im1)
     im2 = np.array(im2)
     device_name = "cuda" if torch.cuda.is_available() else "cpu"
